@@ -1,69 +1,125 @@
 import express from 'express';
-import { getDriver } from '../service/driverservice';
-import passport from 'passport';
-import LocalStrategy from 'passport-local';
-import driverModel from '../models/driver.model';
+import jwt from 'jsonwebtoken';
+import { getDriver } from '../service/driverservice.js';
+import driverModel from '../models/driver.model.js';
+import { getTokenFrom } from '../utils/auth.js';
 
 const router = express.Router();
 
 router.get('/', (req, res) => {
-  const { to, from } = req.params;
+  const { to, from, location } = req.params;
+
+  if (location) {
+    const driverData = getDriver(location, location);
+    return res.status(200).send(driverData);
+  }
+
   const driverData = getDriver(from, to);
-  res.status(200).send(driverData);
+  return res.status(200).send(driverData);
 });
 
-router.post('/login', (req, res) => {
-  passport.use(
-    new LocalStrategy(
-      driverModel.findOne({ username: username }, function (err, user) {
-        console.log('User ' + username + ' attempted to log in.');
-        if (err) return done(err);
-        if (!user) return done(null, false);
-        if (!bcrypt.compareSync(password, user.password)) {
-          return done(null, false);
-        }
-        return done(null, user);
-      })
-    )
+// Get driverdata
+router.get('/:id', async (req, res) => {
+  const token = getTokenFrom(req);
+  const decodedToken = jwt.verify(token, 'izhan');
+  if (!token || !decodedToken.id) {
+    return response.status(401).json({ error: 'token missing or invalid' });
+  }
+
+  const driver = await driverModel.findById(decodedToken.id);
+
+  if (!driver) {
+    res.status(400).json({ error: 'Unauthorized Access' });
+  }
+
+  res.status(200).send(driver);
+});
+
+//Update driver data
+router.put('/:id', async (req, res) => {
+  const dealerData = req.body.dealer;
+  const id = req.params.id;
+
+  const driver = await driverModel.updateOne(
+    { _id: id },
+    { $push: { dealers: dealerData } }
   );
 
-  res.status(200);
+  if (driver) {
+    res.status(200).send('Driver has been notified');
+  }
+
+  res.status(500).send('Error on the server');
 });
 
-router.post(
-  '/register',
-  (req, res, next) => {
-    const hash = bcrypt.hashSync(req.body.password, 12);
-    driverModel
-      .findOne({ username: req.body.username })
-      .then((res) => {
-        if (res) {
-          res.redirect('/');
-        }
-        driverModel.insertOne(
-          {
-            username: req.body.username,
-            password: hash,
-          },
-          (err, doc) => {
-            if (err) {
-              res.redirect('/');
-            } else {
-              next(null, doc.ops[0]);
-            }
-          }
-        );
-      })
-      .catch((err) => {
-        if (err) {
-          next(err);
-        }
-      });
-  },
-  passport.authenticate('local', { failureRedirect: '/' }),
-  (req, res, next) => {
-    res.redirect('/');
+// Login for drivers
+router.post('/login', async (req, res) => {
+  const body = req.body;
+  const driver = await driverModel.findOne({ username: username });
+
+  const passwordCorrect =
+    driver === null
+      ? false
+      : await bcrypt.compare(body.password, driver.password);
+
+  if (!(driver && passwordCorrect)) {
+    return response.status(401).json({
+      error: 'invalid username or password',
+    });
   }
-);
+
+  const driverToken = {
+    username: driver.username,
+    id: driver.id,
+  };
+
+  const token = jwt.sign(driverToken, 'izhan');
+
+  response
+    .status(200)
+    .send({ token, username: driver.username, name: driver.name });
+});
+
+//Register for drivers
+router.post('/register', async (req, res) => {
+  const {
+    name,
+    username,
+    password,
+    age,
+    truckno,
+    mobileno,
+    capacity,
+    transporter,
+    experience,
+    city,
+    state,
+  } = req.body;
+
+  const doc = await driverModel.findOne({ username: username });
+
+  if (doc) {
+    return res.status(400).send({ error: 'Username is already taken' });
+  }
+
+  const hash = bcrypt.hashSync(password, 12);
+
+  const driver = new driverModel({
+    name,
+    username,
+    password: hash,
+    age,
+    truckno,
+    mobileno,
+    capacity,
+    transporter,
+    experience,
+    city,
+    state,
+  });
+
+  const saveddriver = await driver.save();
+  return res.status(200).json({ saveddriver });
+});
 
 export default router;

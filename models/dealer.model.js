@@ -1,11 +1,11 @@
-import { Schema, model } from 'mongoose';
+import mongoose from 'mongoose';
 
-const dealerSchema = new Schema({
+const dealerSchema = new mongoose.Schema({
   name: {
     type: String,
     required: true,
   },
-  usename: {
+  username: {
     type: String,
     required: true,
   },
@@ -13,30 +13,24 @@ const dealerSchema = new Schema({
     type: String,
     required: true,
   },
-  age: {
-    type: Number,
-    required: true,
-  },
-  truckno: {
-    type: Number,
-    required: true,
-  },
+
   mobileno: {
     type: Number,
     required: true,
   },
-  capacity: {
+  nature: {
     type: String,
     required: true,
   },
-  transporter: {
-    type: String,
-    required: true,
-  },
-  experience: {
+  weigth: {
     type: Number,
     required: true,
   },
+  quantity: {
+    type: Number,
+    required: true,
+  },
+
   city: {
     type: String,
     required: true,
@@ -47,6 +41,6 @@ const dealerSchema = new Schema({
   },
 });
 
-const dealerModel = model('dealer', dealerSchema);
+const dealerModel = mongoose.model('dealer', dealerSchema);
 
 export default dealerModel;

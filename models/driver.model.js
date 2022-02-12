@@ -1,11 +1,11 @@
-import { Schema, model } from 'mongoose';
+import mongoose from 'mongoose';
 
-const driverSchema = new Schema({
+const driverSchema = new mongoose.Schema({
   name: {
     type: String,
     required: true,
   },
-  usename: {
+  username: {
     type: String,
     required: true,
   },
@@ -13,19 +13,27 @@ const driverSchema = new Schema({
     type: String,
     required: true,
   },
+  age: {
+    type: Number,
+    required: true,
+  },
+  truckno: {
+    type: Number,
+    required: true,
+  },
   mobileno: {
     type: Number,
     required: true,
   },
-  nature: {
+  capacity: {
     type: String,
     required: true,
   },
-  weigth: {
-    type: Number,
+  transporter: {
+    type: String,
     required: true,
   },
-  quantity: {
+  experience: {
     type: Number,
     required: true,
   },
@@ -39,6 +47,6 @@ const driverSchema = new Schema({
   },
 });
 
-const driverModel = model('driver', driverSchema);
+const driverModel = mongoose.model('driver', driverSchema);
 
 export default driverModel;

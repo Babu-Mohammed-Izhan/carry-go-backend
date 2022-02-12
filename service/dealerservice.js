@@ -1,4 +1,4 @@
-import dealerModel from '../models/dealer.model';
+import dealerModel from '../models/dealer.model.js';
 
 const getDealers = async (from, to) => {
   const dealer = await dealerModel.find({});
@@ -10,12 +10,10 @@ const addDealers = async (data) => {
     name: data.name,
     usename: data.username,
     password: data.password,
-    age: data.age,
-    truckno: data.truckno,
     mobileno: data.mobileno,
-    capacity: data.capacity,
-    transporter: data.transporter,
-    experience: data.experience,
+    nature: data.nature,
+    weigth: data.weigth,
+    quantity: data.quantity,
     city: data.city,
     state: data.state,
   });

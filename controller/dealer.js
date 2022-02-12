@@ -1,59 +1,94 @@
 import express from 'express';
 import bcrypt from 'bcrypt';
-import dealerModel from '../models/dealer.model';
-import { getDealers } from '../service/dealerservice';
+import jwt from 'jsonwebtoken';
+import dealerModel from '../models/dealer.model.js';
+import { getDealers } from '../service/dealerservice.js';
+import { getTokenFrom } from '../utils/auth.js';
 
 const router = express.Router();
 
 router.get('/', (req, res) => {
-  const { to, from } = req.params;
-  const dealerData = getDealers(from, to);
+  const dealerData = getDealers();
   res.status(200).send(dealerData);
 });
 
-router.post('/login', (req, res) => {
-  passport.use(
-    new LocalStrategy(
-      dealerModel.findOne({ username: username }, function (err, user) {
-        console.log('User ' + username + ' attempted to log in.');
-        if (err) return done(err);
-        if (!user) return done(null, false);
-        if (!bcrypt.compareSync(password, user.password)) {
-          return done(null, false);
-        }
-        return done(null, user);
-      })
-    )
-  );
+// Get dealerdata
+router.get('/:id', async (req, res) => {
+  const token = getTokenFrom(req);
+  const decodedToken = jwt.verify(token, 'izhan');
+  if (!token || !decodedToken.id) {
+    return res.status(401).json({ error: 'token missing or invalid' });
+  }
+
+  const dealer = await dealerModel.findById(decodedToken.id);
+
+  if (!dealer) {
+    res.status(400).json({ error: 'Unauthorized Access' });
+  }
+
+  res.status(200).send(dealer);
 });
 
-router.post('/register', (req, res) => {
-  const hash = bcrypt.hashSync(req.body.password, 12);
-  dealerModel
-    .findOne({ username: req.body.username })
-    .then((res) => {
-      if (res) {
-        res.redirect('/');
-      }
-      dealerModel.insertOne(
-        {
-          username: req.body.username,
-          password: hash,
-        },
-        (err, doc) => {
-          if (err) {
-            res.redirect('/');
-          } else {
-            next(null, doc.ops[0]);
-          }
-        }
-      );
-    })
-    .catch((err) => {
-      if (err) {
-        next(err);
-      }
+router.post('/login', async (req, res) => {
+  const body = req.body;
+  const dealer = await dealerModel.findOne({ username: username });
+
+  const passwordCorrect =
+    dealer === null
+      ? false
+      : await bcrypt.compare(body.password, dealer.password);
+
+  if (!(dealer && passwordCorrect)) {
+    return response.status(401).json({
+      error: 'invalid username or password',
     });
+  }
+
+  const dealerToken = {
+    username: dealer.username,
+    id: dealer.id,
+  };
+
+  const token = jwt.sign(dealerToken, 'izhan');
+
+  res.status(200).send({ token, username: dealer.username, name: dealer.name });
+});
+
+router.post('/register', async (req, res) => {
+  const {
+    name,
+    username,
+    password,
+    mobileno,
+    nature,
+    weigth,
+    quantity,
+    routes,
+    dealers,
+  } = req.body;
+
+  const doc = await dealerModel.findOne({ username: username });
+
+  if (doc) {
+    return res.status(400).send({ error: 'Username is already taken' });
+  }
+
+  const hash = bcrypt.hashSync(password, 12);
+
+  const dealer = new dealerModel({
+    name,
+    username,
+    password: hash,
+    mobileno,
+    nature,
+    weigth,
+    quantity,
+    routes,
+    dealers,
+  });
+
+  const savedDealer = await dealer.save();
+  return res.status(200).json({ savedDealer });
 });
 
 export default router;
