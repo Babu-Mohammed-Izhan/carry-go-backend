@@ -2,10 +2,23 @@ import driverModel from '../models/driver.model.js';
 
 const getDriver = async (from, to) => {
   const driver = await driverModel.find({
-    'routes.from': {
-      from: `${from}-${to}`,
+    'routes.from': `${from}`,
+    'routes.to': `${to}`,
+  });
+  driver.then((res) => {
+    console.log(res);
+  });
+  return driver;
+};
+
+const searchDriver = async (from, to) => {
+  const driver = await driverModel.find({
+    routes: {
+      $elemMatch: {
+        from: `${from}`,
+        to: `${to}`,
+      },
     },
-    'routes.to': { to: `${from}-${to}` },
   });
   return driver;
 };
@@ -28,4 +41,4 @@ const addDriver = async (data) => {
   return savedDriver;
 };
 
-export { getDriver, addDriver };
+export { getDriver, addDriver, searchDriver };

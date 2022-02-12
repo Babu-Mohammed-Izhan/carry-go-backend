@@ -29,5 +29,5 @@ app.use('/api/dealer', dealerRouter);
 app.use('/api/driver', driverRouter);
 
 app.listen(3001, () => {
-  console.log('Connected to server');
+  console.log('Connected to server on port 3001');
 });

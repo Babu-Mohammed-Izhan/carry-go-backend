@@ -29,6 +29,7 @@ router.get('/:id', async (req, res) => {
   res.status(200).send(dealer);
 });
 
+// Login dealer
 router.post('/login', async (req, res) => {
   const body = req.body;
   const dealer = await dealerModel.findOne({ username: username });

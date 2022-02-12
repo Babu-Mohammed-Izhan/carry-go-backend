@@ -9,11 +9,14 @@ const dealerSchema = new mongoose.Schema({
     type: String,
     required: true,
   },
+  email: {
+    type: String,
+    required: true,
+  },
   password: {
     type: String,
     required: true,
   },
-
   mobileno: {
     type: Number,
     required: true,
@@ -30,7 +33,6 @@ const dealerSchema = new mongoose.Schema({
     type: Number,
     required: true,
   },
-
   city: {
     type: String,
     required: true,

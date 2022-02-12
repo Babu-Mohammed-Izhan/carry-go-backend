@@ -7,7 +7,7 @@ import { getTokenFrom } from '../utils/auth.js';
 const router = express.Router();
 
 router.get('/', (req, res) => {
-  const { to, from, location } = req.params;
+  const { to, from, location } = req.query;
 
   if (location) {
     const driverData = getDriver(location, location);
@@ -15,6 +15,7 @@ router.get('/', (req, res) => {
   }
 
   const driverData = getDriver(from, to);
+  console.log(driverData);
   return res.status(200).send(driverData);
 });
 
@@ -92,8 +93,7 @@ router.post('/register', async (req, res) => {
     capacity,
     transporter,
     experience,
-    city,
-    state,
+    routes,
   } = req.body;
 
   const doc = await driverModel.findOne({ username: username });
@@ -114,8 +114,8 @@ router.post('/register', async (req, res) => {
     capacity,
     transporter,
     experience,
-    city,
-    state,
+    routes,
+    dealers: [],
   });
 
   const saveddriver = await driver.save();
