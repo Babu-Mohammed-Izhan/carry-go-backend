@@ -54,7 +54,7 @@ router.post('/login', async (req, res) => {
 
   dealer['password'] = '';
 
-  res.status(200).send({ token, dealer });
+  res.status(200).send({ ...dealer, token });
 });
 
 router.post('/register', async (req, res) => {

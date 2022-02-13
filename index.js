@@ -1,3 +1,4 @@
+import 'dotenv/config';
 import express from 'express';
 import cors from 'cors';
 import mongoose from 'mongoose';
@@ -28,6 +29,6 @@ app.use('/api/dealer', dealerRouter);
 
 app.use('/api/driver', driverRouter);
 
-app.listen(3001, () => {
-  console.log('Connected to server on port 3001');
+app.listen(process.env.PORT || 3001, () => {
+  console.log(`Connected to server on port ${process.env.PORT}`);
 });

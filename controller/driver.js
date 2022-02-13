@@ -16,7 +16,6 @@ router.get('/', async (req, res) => {
   }
 
   const driverData = await getDriver(from, to);
-  console.log(driverData);
   return res.status(200).send(driverData);
 });
 
@@ -48,7 +47,8 @@ router.put('/:id', async (req, res) => {
   );
 
   if (driver) {
-    return res.status(200).send('Driver has been notified');
+    const updatedDriver = await driverModel.findById(id);
+    return res.status(200).send(updatedDriver);
   }
 
   return res.status(500).send('Error on the server');
@@ -79,7 +79,7 @@ router.post('/login', async (req, res) => {
 
   driver['password'] = '';
 
-  res.status(200).send({ token, driver });
+  res.status(200).send({ ...driver, token });
 });
 
 //Register for drivers
