@@ -9,11 +9,20 @@ router.get('/', async (req, res) => {
   const { to, from, location } = req.query;
 
   if (location) {
-    const driverData = await searchDriver(location, location);
+    console.log(location);
+    const driverDataTemp = await getDriver(location, location);
+    const driverData = driverDataTemp.map((d) => {
+      d['password'] = '';
+      return d;
+    });
     return res.status(200).send(driverData);
   }
 
-  const driverData = await getDriver(from, to);
+  const driverDataTemp = await searchDriver(from, to);
+  const driverData = driverDataTemp.map((d) => {
+    d['password'] = '';
+    return d;
+  });
   return res.status(200).send(driverData);
 });
 

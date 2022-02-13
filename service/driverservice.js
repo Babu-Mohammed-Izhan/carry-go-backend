@@ -1,10 +1,15 @@
 import driverModel from '../models/driver.model.js';
 
 const getDriver = async (from, to) => {
-  const driver = await driverModel.find({
+  const driverFrom = await driverModel.find({
     'routes.from': `${from}`,
+  });
+  const driverTo = await driverModel.find({
     'routes.to': `${to}`,
   });
+
+  const driver = [...driverFrom, ...driverTo];
+
   return driver;
 };
 
