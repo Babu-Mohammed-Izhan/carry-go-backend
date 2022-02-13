@@ -32,7 +32,7 @@ router.get('/:id', async (req, res) => {
 // Login dealer
 router.post('/login', async (req, res) => {
   const body = req.body;
-  const dealer = await dealerModel.findOne({ username: username });
+  const dealer = await dealerModel.findOne({ username: body.username });
 
   const passwordCorrect =
     dealer === null
@@ -40,7 +40,7 @@ router.post('/login', async (req, res) => {
       : await bcrypt.compare(body.password, dealer.password);
 
   if (!(dealer && passwordCorrect)) {
-    return response.status(401).json({
+    return res.status(401).json({
       error: 'invalid username or password',
     });
   }
@@ -52,7 +52,9 @@ router.post('/login', async (req, res) => {
 
   const token = jwt.sign(dealerToken, 'izhan');
 
-  res.status(200).send({ token, username: dealer.username, name: dealer.name });
+  dealer['password'] = '';
+
+  res.status(200).send({ token, dealer });
 });
 
 router.post('/register', async (req, res) => {
@@ -60,12 +62,13 @@ router.post('/register', async (req, res) => {
     name,
     username,
     password,
+    email,
     mobileno,
     nature,
     weigth,
     quantity,
-    routes,
-    dealers,
+    state,
+    city,
   } = req.body;
 
   const doc = await dealerModel.findOne({ username: username });
@@ -80,12 +83,13 @@ router.post('/register', async (req, res) => {
     name,
     username,
     password: hash,
+    email,
     mobileno,
     nature,
     weigth,
     quantity,
-    routes,
-    dealers,
+    state,
+    city,
   });
 
   const savedDealer = await dealer.save();

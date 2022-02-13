@@ -5,9 +5,6 @@ const getDriver = async (from, to) => {
     'routes.from': `${from}`,
     'routes.to': `${to}`,
   });
-  driver.then((res) => {
-    console.log(res);
-  });
   return driver;
 };
 

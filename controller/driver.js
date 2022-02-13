@@ -1,20 +1,21 @@
 import express from 'express';
 import jwt from 'jsonwebtoken';
-import { getDriver } from '../service/driverservice.js';
+import bcrypt from 'bcrypt';
+import { getDriver, searchDriver } from '../service/driverservice.js';
 import driverModel from '../models/driver.model.js';
 import { getTokenFrom } from '../utils/auth.js';
 
 const router = express.Router();
 
-router.get('/', (req, res) => {
+router.get('/', async (req, res) => {
   const { to, from, location } = req.query;
 
   if (location) {
-    const driverData = getDriver(location, location);
+    const driverData = await searchDriver(location, location);
     return res.status(200).send(driverData);
   }
 
-  const driverData = getDriver(from, to);
+  const driverData = await getDriver(from, to);
   console.log(driverData);
   return res.status(200).send(driverData);
 });
@@ -47,16 +48,16 @@ router.put('/:id', async (req, res) => {
   );
 
   if (driver) {
-    res.status(200).send('Driver has been notified');
+    return res.status(200).send('Driver has been notified');
   }
 
-  res.status(500).send('Error on the server');
+  return res.status(500).send('Error on the server');
 });
 
 // Login for drivers
 router.post('/login', async (req, res) => {
   const body = req.body;
-  const driver = await driverModel.findOne({ username: username });
+  const driver = await driverModel.findOne({ username: body.username });
 
   const passwordCorrect =
     driver === null
@@ -64,7 +65,7 @@ router.post('/login', async (req, res) => {
       : await bcrypt.compare(body.password, driver.password);
 
   if (!(driver && passwordCorrect)) {
-    return response.status(401).json({
+    return res.status(401).json({
       error: 'invalid username or password',
     });
   }
@@ -76,9 +77,9 @@ router.post('/login', async (req, res) => {
 
   const token = jwt.sign(driverToken, 'izhan');
 
-  response
-    .status(200)
-    .send({ token, username: driver.username, name: driver.name });
+  driver['password'] = '';
+
+  res.status(200).send({ token, driver });
 });
 
 //Register for drivers
@@ -87,6 +88,7 @@ router.post('/register', async (req, res) => {
     name,
     username,
     password,
+    email,
     age,
     truckno,
     mobileno,
@@ -108,6 +110,7 @@ router.post('/register', async (req, res) => {
     name,
     username,
     password: hash,
+    email,
     age,
     truckno,
     mobileno,
