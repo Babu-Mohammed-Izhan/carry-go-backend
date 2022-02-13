@@ -9,7 +9,6 @@ router.get('/', async (req, res) => {
   const { to, from, location } = req.query;
 
   if (location) {
-    console.log(location);
     const driverDataTemp = await getDriver(location, location);
     const driverData = driverDataTemp.map((d) => {
       d['password'] = '';
