@@ -1,9 +1,7 @@
 import express from 'express';
-import jwt from 'jsonwebtoken';
 import bcrypt from 'bcrypt';
 import { getDriver, searchDriver } from '../service/driverservice.js';
 import driverModel from '../models/driver.model.js';
-import { getTokenFrom } from '../utils/auth.js';
 
 const router = express.Router();
 
@@ -17,23 +15,6 @@ router.get('/', async (req, res) => {
 
   const driverData = await getDriver(from, to);
   return res.status(200).send(driverData);
-});
-
-// Get driverdata
-router.get('/:id', async (req, res) => {
-  const token = getTokenFrom(req);
-  const decodedToken = jwt.verify(token, 'izhan');
-  if (!token || !decodedToken.id) {
-    return response.status(401).json({ error: 'token missing or invalid' });
-  }
-
-  const driver = await driverModel.findById(decodedToken.id);
-
-  if (!driver) {
-    res.status(400).json({ error: 'Unauthorized Access' });
-  }
-
-  res.status(200).send(driver);
 });
 
 //Update driver data
@@ -70,16 +51,9 @@ router.post('/login', async (req, res) => {
     });
   }
 
-  const driverToken = {
-    username: driver.username,
-    id: driver.id,
-  };
-
-  const token = jwt.sign(driverToken, 'izhan');
-
   driver['password'] = '';
 
-  res.status(200).send({ ...driver, token });
+  res.status(200).send(driver);
 });
 
 //Register for drivers
@@ -122,7 +96,7 @@ router.post('/register', async (req, res) => {
   });
 
   const saveddriver = await driver.save();
-  return res.status(200).json({ saveddriver });
+  return res.status(200).json(saveddriver);
 });
 
 export default router;

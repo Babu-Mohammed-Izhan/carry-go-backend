@@ -1,33 +1,8 @@
 import express from 'express';
 import bcrypt from 'bcrypt';
-import jwt from 'jsonwebtoken';
 import dealerModel from '../models/dealer.model.js';
-import { getDealers } from '../service/dealerservice.js';
-import { getTokenFrom } from '../utils/auth.js';
 
 const router = express.Router();
-
-router.get('/', (req, res) => {
-  const dealerData = getDealers();
-  res.status(200).send(dealerData);
-});
-
-// Get dealerdata
-router.get('/:id', async (req, res) => {
-  const token = getTokenFrom(req);
-  const decodedToken = jwt.verify(token, 'izhan');
-  if (!token || !decodedToken.id) {
-    return res.status(401).json({ error: 'token missing or invalid' });
-  }
-
-  const dealer = await dealerModel.findById(decodedToken.id);
-
-  if (!dealer) {
-    res.status(400).json({ error: 'Unauthorized Access' });
-  }
-
-  res.status(200).send(dealer);
-});
 
 // Login dealer
 router.post('/login', async (req, res) => {
@@ -45,16 +20,9 @@ router.post('/login', async (req, res) => {
     });
   }
 
-  const dealerToken = {
-    username: dealer.username,
-    id: dealer.id,
-  };
-
-  const token = jwt.sign(dealerToken, 'izhan');
-
   dealer['password'] = '';
 
-  res.status(200).send({ ...dealer, token });
+  res.status(200).send(dealer);
 });
 
 router.post('/register', async (req, res) => {
