@@ -1,7 +1,9 @@
 import express from 'express';
 import bcrypt from 'bcrypt';
+import nodemailer from 'nodemailer';
 import { getDriver, searchDriver } from '../service/driverservice.js';
 import driverModel from '../models/driver.model.js';
+import otpModel from '../models/otp.model.js';
 
 const router = express.Router();
 
@@ -43,25 +45,85 @@ router.put('/:id', async (req, res) => {
   return res.status(500).send('Error on the server');
 });
 
+router.post('/otp', async (req, res) => {
+  const { email } = req.body;
+  if (email) {
+    const driver = await driverModel.findOne({ email: email });
+    if (driver) {
+      const otp = Math.floor(1000 + Math.random() * 9000);
+
+      const otpTemp = new otpModel({
+        email: email,
+        otp: `${otp}`,
+      });
+
+      await otpTemp.save();
+
+      const transporter = nodemailer.createTransport({
+        host: 'smtp.gmail.com',
+        port: 456,
+        secure: true,
+        service: 'Gmail',
+        auth: {
+          user: 'carryGo1234@gmail.com',
+          pass: 'CarryGo2022',
+        },
+      });
+
+      const mail = await transporter.sendMail({
+        from: 'carryGo1234@gmail.com',
+        to: email,
+        subject: 'OTP verification',
+        text: `${otp}`,
+      });
+
+      return res.status(200).send('sendOtp');
+    }
+    return res.status(400).send('Invalid Email');
+  }
+  return res.status(500).send('Server Error');
+});
+
 // Login for drivers
 router.post('/login', async (req, res) => {
-  const body = req.body;
-  const driver = await driverModel.findOne({ username: body.username });
+  const { username, password, email, otp } = req.body;
 
-  const passwordCorrect =
-    driver === null
-      ? false
-      : await bcrypt.compare(body.password, driver.password);
+  if (username && password) {
+    const driver = await driverModel.findOne({ username: username });
 
-  if (!(driver && passwordCorrect)) {
+    const passwordCorrect =
+      driver === null ? false : await bcrypt.compare(password, driver.password);
+
+    if (!(driver && passwordCorrect)) {
+      return res.status(401).json({
+        error: 'invalid username or password',
+      });
+    }
+
+    driver['password'] = '';
+
+    return res.status(200).send(driver);
+  }
+  if (email) {
+    const user = await otpModel.findOne({ otp: otp });
+    if (user.otp === otp) {
+      const driver = await driverModel.findOne({ email: email });
+      if (driver) {
+        driver['password'] = '';
+
+        otpModel.deleteOne({ otp: `${otp}` });
+
+        return res.status(200).send(driver);
+      }
+      return res.status(401).json({
+        error: 'invalid username or password',
+      });
+    }
     return res.status(401).json({
       error: 'invalid username or password',
     });
   }
-
-  driver['password'] = '';
-
-  res.status(200).send(driver);
+  return res.status(500).send('Server Error');
 });
 
 //Register for drivers
