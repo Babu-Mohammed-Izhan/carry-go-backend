@@ -2,13 +2,17 @@ import 'dotenv/config';
 import express from 'express';
 import cors from 'cors';
 import mongoose from 'mongoose';
+import passport from 'passport';
 import dealerRouter from './controller/dealer.js';
 import driverRouter from './controller/driver.js';
 
 const app = express();
 
+require('./config/passportDriver');
+
 app.use(cors());
 app.use(express.json());
+app.use(passport.initialize());
 
 mongoose
   .connect(
