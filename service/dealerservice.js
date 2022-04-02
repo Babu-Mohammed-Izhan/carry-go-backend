@@ -1,4 +1,4 @@
-import dealerModel from '../models/dealer.model.js';
+const dealerModel = require('../models/dealer.model.js');
 
 const getDealers = async () => {
   const dealer = await dealerModel.find({});

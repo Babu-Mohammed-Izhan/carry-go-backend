@@ -1,4 +1,4 @@
-import mongoose from 'mongoose';
+const mongoose = require('mongoose');
 
 const dealerSchema = new mongoose.Schema({
   name: {

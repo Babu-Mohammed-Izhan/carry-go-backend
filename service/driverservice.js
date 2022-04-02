@@ -1,4 +1,4 @@
-import driverModel from '../models/driver.model.js';
+const driverModel = require('../models/driver.model.js');
 
 const getDriver = async (from, to) => {
   const driverFrom = await driverModel.find({
