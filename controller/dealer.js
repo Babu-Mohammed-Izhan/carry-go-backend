@@ -1,8 +1,8 @@
-import express from 'express';
-import bcrypt from 'bcrypt';
-import nodemailer from 'nodemailer';
-import dealerModel from '../models/dealer.model.js';
-import otpModel from '../models/otp.model.js';
+const express = require('express');
+const bcrypt = require('bcrypt');
+const nodemailer = require('nodemailer');
+const dealerModel = require('../models/dealer.model.js');
+const otpModel = require('../models/otp.model.js');
 
 const router = express.Router();
 
@@ -123,4 +123,4 @@ router.post('/register', async (req, res) => {
   return res.status(200).json({ savedDealer });
 });
 
-export default router;
+module.exports = router;

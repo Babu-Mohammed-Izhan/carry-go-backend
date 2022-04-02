@@ -1,9 +1,9 @@
-import express from 'express';
-import bcrypt from 'bcrypt';
-import nodemailer from 'nodemailer';
-import { getDriver, searchDriver } from '../service/driverservice.js';
-import driverModel from '../models/driver.model.js';
-import otpModel from '../models/otp.model.js';
+const express = require('express');
+const bcrypt = require('bcrypt');
+const nodemailer = require('nodemailer');
+const { getDriver, searchDriver } = require('../service/driverservice.js');
+const driverModel = require('../models/driver.model.js');
+const otpModel = require('../models/otp.model.js');
 
 const router = express.Router();
 
@@ -169,4 +169,4 @@ router.post('/register', async (req, res) => {
   return res.status(200).json(saveddriver);
 });
 
-export default router;
+module.exports = router;

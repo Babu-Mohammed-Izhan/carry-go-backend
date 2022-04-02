@@ -45,4 +45,4 @@ const dealerSchema = new mongoose.Schema({
 
 const dealerModel = mongoose.model('dealer', dealerSchema);
 
-export default dealerModel;
+module.exports = dealerModel;

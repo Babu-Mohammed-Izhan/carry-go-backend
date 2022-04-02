@@ -43,4 +43,4 @@ const addDriver = async (data) => {
   return savedDriver;
 };
 
-export { getDriver, addDriver, searchDriver };
+module.exports = { getDriver, addDriver, searchDriver };

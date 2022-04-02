@@ -21,4 +21,4 @@ const addDealers = async (data) => {
   return savedDealer;
 };
 
-export { getDealers, addDealers };
+module.exports = { getDealers, addDealers };
