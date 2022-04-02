@@ -1,10 +1,10 @@
 import 'dotenv/config';
-import express from 'express';
-import cors from 'cors';
-import mongoose from 'mongoose';
-import passport from 'passport';
-import dealerRouter from './controller/dealer.js';
-import driverRouter from './controller/driver.js';
+const express = require('express');
+const cors = require('cors');
+const mongoose = require('mongoose');
+const passport = require('passport');
+const dealerRouter = require('./controller/dealer');
+const driverRouter = require('./controller/driver');
 
 const app = express();
 
